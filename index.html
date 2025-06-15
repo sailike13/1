@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自助下单发卡平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            background-attachment: fixed;
+        }
+        
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 0;
+            color: white;
+            animation: fadeInDown 1s ease;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0 40px;
+            position: relative;
+            animation: fadeIn 1.2s ease;
+        }
+        
+        .steps::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 10%;
+            width: 80%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 0;
+            border-radius: 2px;
+        }
+        
+        .step {
+            text-align: center;
+            width: 22%;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: #4da6ff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-weight: bold;
+            font-size: 1.3rem;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .step.active .step-number {
+            background: #ff9800;
+            transform: scale(1.1);
+        }
+        
+        .step-text {
+            color: white;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 40px;
+            animation: slideUp 1s ease;
+        }
+        
+        .products {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 25px;
+            transition: transform 0.3s ease;
+        }
+        
+        .products:hover {
+            transform: translateY(-5px);
+        }
+        
+        .products h2 {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .product-card {
+            border: 2px solid #eaeaea;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-card:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: #4da6ff;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+            border-color: #4dabf7;
+        }
+        
+        .product-card:hover:before {
+            transform: scaleX(1);
+        }
+        
+        .product-card.selected {
+            border-color: #4dabf7;
+            background-color: #f0f7ff;
+        }
+        
+        .product-card.selected:before {
+            transform: scaleX(1);
+            background: #4dabf7;
+        }
+        
+        .product-card i {
+            font-size: 3rem;
+            color: #4da6ff;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .product-card:hover i {
+            transform: scale(1.1);
+            color: #ff6b6b;
+        }
+        
+        .product-card h3 {
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+        
+        .product-card .price {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin: 10px 0;
+        }
+        
+        .product-card .description {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+            margin-top: 10px;
+        }
+        
+        .order-form {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 25px;
+            transition: transform 0.3s ease;
+        }
+        
+        .order-form:hover {
+            transform: translateY(-5px);
+        }
+        
+        .order-form h2 {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #eaeaea;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            border-color: #4dabf7;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(77, 171, 247, 0.2);
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #FF512F 0%, #F09819 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 20px;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(25deg);
+            transition: all 0.5s;
+        }
+        
+        .btn:hover:after {
+            left: 120%;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+        
+        .btn:active {
+            transform: translateY(1px);
+        }
+        
+        .summary {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            padding: 25px;
+            margin-top: 20px;
+            border: 1px solid #eaeaea;
+        }
+        
+        .summary h3 {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .summary-item.total {
+            font-weight: bold;
+            font-size: 1.2rem;
+            border-bottom: none;
+            margin-top: 10px;
+            color: #ff6b6b;
+        }
+        
+        .payment-methods {
+            display: flex;
+            justify-content: space-between;
+            margin: 30px 0;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .payment-method {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+            background: white;
+            padding: 15px 5px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        
+        .payment-method:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .payment-method.selected {
+            border-color: #4dabf7;
+            background-color: #f0f7ff;
+        }
+        
+        .payment-method i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .payment-method.alipay i {
+            color: #009FE8;
+        }
+        
+        .payment-method.wechat i {
+            color: #07C160;
+        }
+        
+        .payment-method.bank i {
+            color: #FF5722;
+        }
+        
+        .payment-method.paypal i {
+            color: #003087;
+        }
+        
+        footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+            padding: 20px 0;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            animation: modalShow 0.4s;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        
+        @keyframes modalShow {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #27ae60;
+        }
+        
+        .modal p {
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .modal-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+        
+        .modal-btn:hover {
+            background: #219653;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        @keyframes fadeIn {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .steps {
+                flex-wrap: wrap;
+            }
+            
+            .step {
+                width: 48%;
+                margin-bottom: 25px;
+            }
+            
+            .steps::before {
+                display: none;
+            }
+            
+            .payment-methods {
+                flex-wrap: wrap;
+            }
+            
+            .payment-method {
+                min-width: calc(50% - 10px);
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-shopping-cart"></i> 自助下单发卡平台</h1>
+            <p>选择您需要的充值卡，填写简单信息，快速完成下单支付</p>
+        </header>
+        
+        <div class="steps">
+            <div class="step active">
+                <div class="step-number">1</div>
+                <div class="step-text">选择商品</div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-text">填写信息</div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-text">确认订单</div>
+            </div>
+            <div class="step">
+                <div class="step-number">4</div>
+                <div class="step-text">完成支付</div>
+            </div>
+        </div>
+        
+        <div class="main-content">
+            <div class="products">
+                <h2><i class="fas fa-gift"></i> 选择充值卡</h2>
+                <div class="product-grid">
+                    <div class="product-card selected" data-value="50">
+                        <i class="fas fa-money-check-alt"></i>
+                        <h3>50元充值卡</h3>
+                        <div class="price">¥50.00</div>
+                        <div class="description">适用于所有平台充值</div>
+                    </div>
+                    <div class="product-card" data-value="100">
+                        <i class="fas fa-credit-card"></i>
+                        <h3>100元充值卡</h3>
+                        <div class="price">¥100.00</div>
+                        <div class="description">适用于所有平台充值</div>
+                    </div>
+                    <div class="product-card" data-value="200">
+                        <i class="fas fa-wallet"></i>
+                        <h3>200元充值卡</h3>
+                        <div class="price">¥200.00</div>
+                        <div class="description">适用于所有平台充值</div>
+                    </div>
+                    <div class="product-card" data-value="500">
+                        <i class="fas fa-gem"></i>
+                        <h3>500元充值卡</h3>
+                        <div class="price">¥500.00</div>
+                        <div class="description">适用于所有平台充值</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="order-form">
+                <h2><i class="fas fa-user-edit"></i> 填写订单信息</h2>
+                
+                <div class="form-group">
+                    <label for="email"><i class="fas fa-envelope"></i> 电子邮箱</label>
+                    <input type="email" id="email" placeholder="请输入您的电子邮箱" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="quantity"><i class="fas fa-list-ol"></i> 购买数量</label>
+                    <select id="quantity">
+                        <option value="1">1张</option>
+                        <option value="2">2张</option>
+                        <option value="5">5张</option>
+                        <option value="10">10张</option>
+                    </select>
+                </div>
+                
+                <h3 style="margin: 25px 0 15px;"><i class="fas fa-money-bill-wave"></i> 选择支付方式</h3>
+                <div class="payment-methods">
+                    <div class="payment-method alipay selected">
+                        <i class="fab fa-alipay"></i>
+                        <div>支付宝</div>
+                    </div>
+                    <div class="payment-method wechat">
+                        <i class="fab fa-weixin"></i>
+                        <div>微信支付</div>
+                    </div>
+                    <div class="payment-method bank">
+                        <i class="fas fa-university"></i>
+                        <div>银行卡</div>
+                    </div>
+                    <div class="payment-method paypal">
+                        <i class="fab fa-paypal"></i>
+                        <div>PayPal</div>
+                    </div>
+                </div>
+                
+                <div class="summary">
+                    <h3><i class="fas fa-receipt"></i> 订单摘要</h3>
+                    <div class="summary-item">
+                        <span>商品：</span>
+                        <span>50元充值卡 ×1</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>小计：</span>
+                        <span>¥50.00</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span>总计：</span>
+                        <span>¥50.00</span>
+                    </div>
+                </div>
+                
+                <button class="btn" id="pay-btn">
+                    <i class="fas fa-lock"></i> 前往支付
+                </button>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 自助下单发卡平台 | 安全支付 | 7×24小时服务 | 客服邮箱: support@example.com</p>
+        </footer>
+    </div>
+    
+    <div class="modal" id="success-modal">
+        <div class="modal-content">
+            <i class="fas fa-check-circle" style="font-size: 6rem; color: #27ae60; margin: 20px 0;"></i>
+            <h2>订单支付成功！</h2>
+            <p>您的订单已成功提交，正在跳转到支付页面...</p>
+            <p><small>充值卡号将发送到您的电子邮箱</small></p>
+            <button class="modal-btn" id="close-modal">确定</button>
+        </div>
+    </div>
+
+    <script>
+        // 商品选择功能
+        const productCards = document.querySelectorAll('.product-card');
+        productCards.forEach(card => {
+            card.addEventListener('click', () => {
+                productCards.forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                updateOrderSummary();
+            });
+        });
+        
+        // 支付方式选择功能
+        const paymentMethods = document.querySelectorAll('.payment-method');
+        paymentMethods.forEach(method => {
+            method.addEventListener('click', () => {
+                paymentMethods.forEach(m => m.classList.remove('selected'));
+                method.classList.add('selected');
+            });
+        });
+        
+        // 数量变化时更新订单摘要
+        document.getElementById('quantity').addEventListener('change', updateOrderSummary);
+        
+        function updateOrderSummary() {
+            const selectedProduct = document.querySelector('.product-card.selected');
+            const quantity = document.getElementById('quantity').value;
+            const price = parseInt(selectedProduct.dataset.value);
+            const total = price * quantity;
+            
+            document.querySelector('.summary-item:nth-child(2) span:last-child').textContent = 
+                `${selectedProduct.querySelector('h3').textContent} ×${quantity}`;
+                
+            document.querySelector('.summary-item:nth-child(3) span:last-child').textContent = 
+                `¥${price.toFixed(2)}`;
+                
+            document.querySelector('.summary-item.total span:last-child').textContent = 
+                `¥${total.toFixed(2)}`;
+        }
+        
+        // 支付按钮点击事件
+        document.getElementById('pay-btn').addEventListener('click', function() {
+            const email = document.getElementById('email').value;
+            
+            if (!validateEmail(email)) {
+                alert('请输入有效的电子邮箱地址');
+                return;
+            }
+            
+            // 显示成功模态框
+            document.getElementById('success-modal').style.display = 'flex';
+            
+            // 模拟跳转到支付页面
+            setTimeout(() => {
+                alert('正在跳转到支付网关...');
+                // 实际项目中这里会跳转到支付平台的页面
+                // window.location.href = 'https://payment-gateway.com';
+            }, 2000);
+        });
+        
+        // 关闭模态框
+        document.getElementById('close-modal').addEventListener('click', function() {
+            document.getElementById('success-modal').style.display = 'none';
+        });
+        
+        // 初始化页面时更新摘要
+        updateOrderSummary();
+        
+        // 邮箱验证函数
+        function validateEmail(email) {
+            const re = /^(([^<>()
+$$
+$$\\.,;:\s@"]+(\.[^<>()
+$$
+$$\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(email);
+        }
+    </script>
+</body>
+</html>
